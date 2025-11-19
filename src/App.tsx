@@ -1,35 +1,39 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from "react";
+import { listarProdutos, adicionarProduto, deletarProduto } from "./api/produtos";
+import type { Produto } from "./api/produtos";
+import ProdutoForm from "./components/ProdutoForm";
+import ProdutoLista from "./components/ProdutoLista";
 
-function App() {
-  const [count, setCount] = useState(0)
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+export default function App() {
+const [produtos, setProdutos] = useState<Produto[]>([]);
+
+
+async function carregar() {
+setProdutos(await listarProdutos());
 }
 
-export default App
+
+async function salvar(produto: Produto) {
+await adicionarProduto(produto);
+await carregar();
+}
+
+
+async function remover(id: number) {
+await deletarProduto(id);
+await carregar();
+}
+
+
+useEffect(() => { carregar(); }, []);
+
+
+return (
+<div style={{ padding: "20px", maxWidth: "500px" }}>
+<h1>Produtos</h1>
+<ProdutoForm onSubmit={salvar} />
+<ProdutoLista produtos={produtos} onDelete={remover} />
+</div>
+);
+}
